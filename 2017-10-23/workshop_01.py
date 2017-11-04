@@ -77,8 +77,8 @@ VIEW(out())
 # example 1.5.5
 
 piano_x = QUOTE([10, -10, 10])
-piano_xy = PROD([x, x])
-piano_xyz = PROD([y, QUOTE([3])])
+piano_xy = PROD([piano_x,piano_x])
+piano_xyz = PROD([piano_xy, QUOTE([3])])
 
 VIEW(piano_x)
 VIEW(piano_xy)
