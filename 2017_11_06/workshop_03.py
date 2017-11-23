@@ -1,7 +1,6 @@
 from pyplasm import *
 from larlib import *
 
-# some functions used in the project
 def simpleTower(re, ri, ht, nw):
     """ This function returns a simple tower
             :param re: external radius of the tower
@@ -303,14 +302,14 @@ def ggpl_leonardoChurch(dx, dy, dz):
     return S([1, 2, 3])([double(dx/23.4), double(dy/23.4), double(dz/16.35)])(church)
 
 
-#VIEW(STRUCT([simpleTower(1.1, 0.9, 2.5, 200)(0.3, 0.2, 0.07, 0.2), TEXTURE("tegole2.png")(T(3)(3)(HALFSPHERE(1.1)([16, 16])))]))
-#VIEW(STRUCT([mediumTowerA(1.3, 1.1, 1.2)(0.2, 0.3, 0.15, 0.3), TEXTURE("tegole2.png")(T(3)(1.7)(HALFSPHERE(1.3)([16, 16])))]))
-#VIEW(STRUCT([mediumTowerB(1.6, 1.4, 1.5)(0.25, 0.25, 0.1, 0.25), TEXTURE("tegole2.png")(T(3)(2)(HALFSPHERE(1.6)([16, 16])))]))
-#VIEW(STRUCT([bigTower(3, 2.8, 3)(0.5, 0.5, 0.2, 0.35), TEXTURE("tegole2.png")(T(3)(4)(HALFSPHERE(2.8)([16, 16])))]))
-#VIEW(structure_5towers())
-#dx, dy, dz = 23.4, 23.4, 16.35
+VIEW(STRUCT([simpleTower(1.1, 0.9, 2.5, 200)(0.3, 0.2, 0.07, 0.2), TEXTURE("tegole2.png")(T(3)(3)(HALFSPHERE(1.1)([16, 16])))]))
+VIEW(STRUCT([mediumTowerA(1.3, 1.1, 1.2)(0.2, 0.3, 0.15, 0.3), TEXTURE("tegole2.png")(T(3)(1.7)(HALFSPHERE(1.3)([16, 16])))]))
+VIEW(STRUCT([mediumTowerB(1.6, 1.4, 1.5)(0.25, 0.25, 0.1, 0.25), TEXTURE("tegole2.png")(T(3)(2)(HALFSPHERE(1.6)([16, 16])))]))
+VIEW(STRUCT([bigTower(3, 2.8, 3)(0.5, 0.5, 0.2, 0.35), TEXTURE("tegole2.png")(T(3)(4)(HALFSPHERE(2.8)([16, 16])))]))
+VIEW(structure_5towers())
+dx, dy, dz = 23.4, 23.4, 16.35
 
-#VIEW(ggpl_leonardoChurch(dx, dy, dz))
+VIEW(ggpl_leonardoChurch(dx, dy, dz))
 
 dx, dy, dz = 11.7, 11.7, 8.175
 VIEW(ggpl_leonardoChurch(dx, dy, dz))
