@@ -65,8 +65,10 @@ def ggpl_stairBookcase( dx, dy, dz):
 
 # execution with the real measures (in meters) of the bookcase model
 dx, dy, dz = 3.10, 1.05, 2.7
-VIEW(ggpl_stairBookcase(dx, dy, dz))
+#VIEW(ggpl_stairBookcase(dx, dy, dz))
 
 # execution with different parameters
 dx, dy, dz = 6, 3, 4
-VIEW(ggpl_stairBookcase(dx, dy, dz))
+#VIEW(ggpl_stairBookcase(dx, dy, dz))
+
+
