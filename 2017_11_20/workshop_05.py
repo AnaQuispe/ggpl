@@ -35,6 +35,7 @@ def first_floor(filename):
                                                                       MY_CYLINDER([1.61, 1.1])(32)])), inDoor]))
         floor = TEXTURE("marmo_rosso2.png")(T(3)(-0.01)(CUBOID([7.35,7.35,0.01])))
         final = COLOR([1,0.92,0.84])(DIFFERENCE([final_wall, STRUCT([doors_hole, windows_hole])]))
+
         return STRUCT([final, centerHoles,floor])
 
 VIEW(first_floor("piano_terra.lines"))
