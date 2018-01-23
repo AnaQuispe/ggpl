@@ -174,7 +174,7 @@ def externalStair():
 
 def lateralStructure():
 
-    # ground floor of the lateral structure of the villa
+    # GROUND FLOOR OF THE LATERAL STRUCTURE OF THE VILLA
 
     w1 = CUBOID([3.65, 0.25,0.95])
     det = DIFFERENCE([STRUCT([T(2)(-0.06)(CUBOID([3.71,0.37,0.3])),T(2)(-0.03)(CUBOID([3.68,0.31,0.5]))]), w1])
@@ -183,28 +183,156 @@ def lateralStructure():
                   [[1,2,3,9],[10,5,6,7,8],[9,4,5,10]],[[1]]])
     d1 = STRUCT([T(2)(-0.1)(CUBOID([0.8,0.5,0.65])), DIFFERENCE([T([1,2,3])([0.4,0.31,-0.095])(R([2,3])(PI/2)(MY_CYLINDER([0.85,0.31])(32))),
                                                       T([1,3])([-0.7,-1.3])(CUBOID([2,0.31,1.95]))])])
-    holeDoor = STRUCT([T([1,2])([0.25,-0.06])(d1), T([1,2])([0.25,3.65])(d1), T([1,2])([1.3,1.65])(CUBOID([0.15,0.6,0.8]))])
+    hw = T([1,3])([1.6,0.575])(CUBOID([0.4,0.25,0.3]))
+    holeDoor = STRUCT([T([1,2])([0.25,-0.06])(d1), T([1,2])([0.25,3.65])(d1), T([1,2])([1.3,1.65])(CUBOID([0.15,0.6,0.8])),
+                       hw, T(2)(3.65)(hw)])
     finalRoof = T(3)(0.95)(PROD([roof, Q(0.15)]))
     finalGroundFloor = STRUCT([DIFFERENCE([STRUCT([wall1, finalRoof]), holeDoor]), T([1,2])([1.6,0.25])(externalStair())])
 
-    # first floor of the lateral structure of the villa
+    # FIRST FLOOR OF THE LATERAL STRUCTURE OF THE VILLA
 
     w2 = T(3)(1.1)(CUBOID([1.27, 0.25, 1.9]))
-    holeWall = STRUCT([CUBOID([0.8, 0.25, 1.25]), T([1, 3])([0.4, 1.25])(R([2, 3])(-PI / 2)(MY_CYLINDER([0.4, 0.25])(16)))])
-    wall2 = DIFFERENCE([STRUCT([w2,T(2)(3.65)(w2)]), T([1,3])([0.25,1.1])(holeWall), T([1,2,3])([0.25,3.65,1.1])(holeWall)])
 
+    holeWall = STRUCT([CUBOID([0.8, 0.25, 1.25]), T([1, 3])([0.4, 1.25])(R([2, 3])(-PI / 2)(MY_CYLINDER([0.4, 0.25])(16)))])
+    wall2 = DIFFERENCE([STRUCT([w2,T(2)(3.65)(w2)]), T([1,3])([0.25,1.1])(holeWall),
+                        T([1,2,3])([0.25,3.65,1.1])(holeWall)])
+    detw = OFFSET([0, 0.035, 0])(MKPOL([[[0.45, -0.035, 3], [0.85, -0.035, 3], [0.7, -0.035, 2.74], [0.6, -0.035, 2.74]],
+                                        [[1, 2, 3, 4]], [[1]]]))
+    dw = T([1,2,3])([-0.03,-0.03, 2.2])(CUBOID([0.31,0.31,0.15]))
+    detw1 = STRUCT([dw, T(2)(3.65)(dw),T(1)(1.03)(dw),T([1,2])([1.03,3.65])(dw)])
     det2 = T([1, 3])([0.25, 1.1])(CUBOID([0.8, 0.1, 0.35]))
     det3 = T([2,3])([-0.03, 1.1])(CUBOID([1.27,0.03,0.15]))
-    finalDetail = STRUCT([det2, T(2)(3.8)(det2), det3, T(2)(3.93)(det3)])
+    finalDetail = STRUCT([det2, T(2)(3.8)(det2), det3, T(2)(3.93)(det3), detw,T(2)(3.935)(detw), detw1])
 
+    col1 = MY_CYLINDER([0.1,1.75])(16)
+    col2 = MY_CYLINDER([0.14, 0.07])(16)
+    detcolp = R([1,3])(-PI/2)(MY_CYLINDER([0.05,0.25])(16))
+    detcolumn = STRUCT([T([1,2,3])([1.32,0,2.954])(detcolp),T([1,2,3])([1.32,0.2,2.954])(detcolp)])
     columns = []
     for i in range (1,7):
         base = T([1,2,3])([1.3,0.72*(i-1),1.1])(CUBOID([0.3,0.3,0.15]))
-        col = T([1,2,3])([1.45,0.15+0.72*(i-1),1.25])(MY_CYLINDER([0.1,1.75])(16))
-        column = STRUCT([base,col])
+        col = T([1,2,3])([1.45,0.15+0.72*(i-1),1.25])(col1)
+        det01 = T([1,2,3])([1.45,0.15+0.72*(i-1),1.25])(col2)
+        det02 = T(2)(0.05+0.72*(i-1))(detcolumn)
+        column = STRUCT([base,col,det01, T(3)(1.68)(det01), det02])
         columns.append(column)
 
-    return COLOR([1, 0.92, 0.84])(STRUCT([finalGroundFloor, wall2, finalDetail, STRUCT(columns)]))
+    holeRoof = OFFSET([0,3.4])(T([1,2,3])([0.65,0.25,-0.558])(R([2,3])(-PI/2)(MY_CYLINDER([0.85,0.06])(32))))
+    roof = DIFFERENCE([STRUCT([T(2)(-0.03)(CUBOID([1.63,3.96,0.15])), T([2,3])([-0.06,0.15])(CUBOID([1.66,4.02,0.15]))]), holeRoof])
+    finalFirstFloor = STRUCT([wall2, finalDetail, STRUCT(columns), T(3)(3)(roof)])
+
+    # SECOND FLOOR OOF THE LATERAL STRUCTURE STRUCTURE OF THE VILLA
+
+    d4 = STRUCT([T(2)(-0.035)(CUBOID([1.635,3.97,0.17])), T([2,3])([-0.065,0.17])(CUBOID([1.665,4.03,0.05]))])
+    detail4 = DIFFERENCE([d4, CUBOID([1.6,3.9,0.3])])
+    hole3 = R([1,3])(-PI/2)(MY_CYLINDER([0.1,0.15])(16))
+    holeWall3 = STRUCT([T([1,2,3])([1.45,1.22,0.45])(hole3), T([1,2,3])([1.45,2.68,0.45])(hole3)])
+    wall3 = OFFSET([0.15,0,0])(MKPOL([[[1.45,0,0.22],[1.45,3.9,0.22],[1.45,1.95,0.95]],[[1,2,3]],[[1]]]))
+
+    r1 = OFFSET([1.665,0,0])(MKPOL([[[0, -0.094, 0.22],[0,-0.065, 0.17],[0, 1.95, 0.95],[0, 1.95, 1]],[[1, 2, 3, 4]], [[1]]]))
+    roof1 = STRUCT([r1, T([1, 2])([1.665, 3.9])(R([1, 2])(PI)(r1))])
+    r2 = OFFSET([1.7,0,0])(MKPOL([[[0, -0.14, 0.3],[0,-0.094, 0.22],[0, 1.95, 1],[0, 1.95, 1.08]],[[1, 2, 3, 4]], [[1]]]))
+    roof2 = STRUCT([r2, T([1, 2])([1.7, 3.9])(R([1, 2])(PI)(r2))])
+    r3 = TEXTURE("tegole1.png")(OFFSET([1.72,0,0])(MKPOL([[[0, -0.2015, 0.28],[0,-0.19, 0.26],[0, 1.95, 1.08],[0, 1.95, 1.1]],
+                                                          [[1, 2, 3, 4]], [[1]]])))
+    roof3 = STRUCT([r3, T([1, 2])([1.72, 3.9])(R([1, 2])(PI)(r3))])
+    detRoof1 = []
+    detr = CUBOID([0.061,0.03,0.061])
+    for j in range(1,14):
+        detr1 = T([1,2,3])([0.061*(j*2-1),-0.065,0.109])(detr)
+        detRoof1.append(detr1)
+    detRoof2 = []
+    det2 = CUBOID([0.03,0.061,0.061])
+    for k in range(1,33):
+        detr2 = T([1, 2, 3])([1.635, 0.061 * (k * 2 - 1), 0.109])(det2)
+        detRoof2.append(detr2)
+    detRoof3 =[]
+    for m in range(1,17):
+        detr3 = T([1,2,3])([1.6, 0.061*(m*2-1),0.0235*(m*2-1)])(det2)
+        detRoof3.append(detr3)
+    roof4 = T(3)(0.16)(STRUCT(detRoof3))
+
+    dtroof = STRUCT([T([1,2,3])([1.35,0.05,0.33])(CUBOID([0.2,0.2,0.15])), TEXTURE("tegole1.png")(T([1,2,3])([1.32,0.02,0.48])
+                                                                                                  (CUBOID([0.26,0.26,0.05])))])
+    finalDetRoof = STRUCT([STRUCT(detRoof1), T(2)(3.995)(STRUCT(detRoof1)), T(2)(-0.0305)(STRUCT(detRoof2)),
+                           T([1,2])([3.23,3.9])(R([1,2])(PI)(roof4)), roof4,dtroof,T(2)(3.6)(dtroof), T([2,3])([1.8,0.66])(dtroof)])
+    finalWall3 = STRUCT([detail4,DIFFERENCE([wall3, holeWall3]), roof1, roof2, roof3,finalDetRoof])
+
+
+    return COLOR([1, 0.92, 0.84])(STRUCT([finalGroundFloor, finalFirstFloor, T(3)(3.3)(finalWall3)]))
+
+# this function return a half of sphere
+def HALFSPHERE(radius):
+
+    def HALFSPHERE0(subds):
+        N, M = subds
+        domain = Hpc(Grid([N * [PI / N], M * [2 * PI / M]]))
+        domain = MAT([[1, 0, 0, 0], [-PI / 2, 1, 0, 0], [-PI, 0, 1, 0], [0, 0, 0, 1]])(domain)
+        fx = lambda p: radius * math.cos(p[0]) * math.sin(p[1])
+        fy = lambda p: radius * math.cos(p[0]) * math.cos(p[1])
+        fz = lambda p: radius * ABS(math.sin(p[0]))
+        ret = GMAP([fx, fy, fz])(domain)
+        return ret
+    return HALFSPHERE0
+
+
+def roof():
+
+    r1 = OFFSET([0,0,0.04])(MKPOL([[[-0.2,-0.2,0],[3.675,3.675,1.65],[7.55,-0.2,0]],[[1,2,3]],[[1]]]))
+    roof = TEXTURE("tegole3.png")(DIFFERENCE([r1,T([1,2])([3.7,3.675])(MY_CYLINDER([1.71, 1.8])(32))]))
+
+    bigRoof = STRUCT([roof,T(1)(7.35)(R([1,2])(PI/2)(roof)),T([1,2])([7.35,7.35])(R([1,2])(PI)(roof)),T(2)(7.35)(R([1,2])(-PI/2)(roof))])
+    centerWalls = DIFFERENCE([T([1,2])([3.7,3.675])(MY_CYLINDER([1.71, 1.2])(32)),T([1,2])([3.7,3.675])(MY_CYLINDER([1.61, 1.7])(32))])
+
+    finalRoof = STRUCT([bigRoof, centerWalls])
+    dome = T([1, 2, 3])([3.7, 3.675, 0.62])(HALFSPHERE(1.6)([32, 32]))
+
+    frag1 = fragDome([1.77,1.61,0.15,1])
+    frag2 = fragDome([1.61,1.52,0.15,3])
+    frag3 = fragDome([1.48, 1.45,0.1,2])
+    frag4 = fragDome([1.34,1.32, 0.13,2])
+    frag5 = fragDome([1.21,1.19, 0.11,1])
+    frag6 = fragDome([1.05,1.02, 0.11,1])
+    frag7 = fragDome([0.905, 0.87,0.08,3])
+    frag8 = fragDome([0.72,0.7,0.05,3])
+    frag9 = fragDome([0.56, 0.5,0.02,3])
+
+    det2 = MKPOL([[[0.32, 0.137, 0], [0.32, -0.137, 0], [0.1, -0.0475, 0.16], [0.1, 0.0475, 0.16]], [[4, 3, 2, 1]], [[1]]])
+    detDome1 = STRUCT([det2, R([1, 2])(PI / 4)(det2), R([1, 2])(PI / 2)(det2), R([1, 2])(PI / 4 * 3)(det2), R([1, 2])(PI)(det2),
+                      R([1, 2])(-PI / 4)(det2),R([1, 2])(-PI / 2)(det2), R([1, 2])(-PI / 4 * 3)(det2)])
+    det3 = MKPOL([[[0.15, 0.062, 0], [0.15, -0.062, 0], [0, 0, 0.08]], [[3, 2, 1]], [[1]]])
+    detDome2 = STRUCT([det3, R([1, 2])(PI / 4)(det3), R([1, 2])(PI / 2)(det3), R([1, 2])(PI / 4 * 3)(det3), R([1, 2])(PI)(det3),
+                        R([1, 2])(-PI / 4)(det3), R([1, 2])(-PI / 2)(det3), R([1, 2])(-PI / 4 * 3)(det3)])
+    onDome = STRUCT([T(3)(1.099)(MY_CYLINDER([0.35, 0.03])(32)), T(3)(1.129)(MY_CYLINDER([0.37, 0.02])(32)), T(3)(1.149)(detDome1),
+                     T(3)(1.309)(MY_CYLINDER([0.1, 0.01])(16)), T(3)(1.319)(detDome2)])
+
+    finalDome = STRUCT([frag1,T(3)(0.15)(frag2), T(3)(0.3)(frag3), T(3)(0.41)(frag4), T(3)(0.56)(frag5), T(3)(0.67)(frag6),
+                        T(3)(0.805)(frag7), T(3)(0.909)(frag8), T(3)(1)(frag9), onDome])
+
+
+    return STRUCT([finalRoof, T([1,2,3])([3.7,3.675,1.2])(finalDome), dome])
+        #finalRoof
+
+def fragDome(parameters):
+    re,ri,h,t = parameters
+
+    base = DIFFERENCE([MY_CYLINDER([re,h])(32),MY_CYLINDER([ri,h])(16)])
+    angle = (3.14*(re+0.02))/20
+    if(t==1):
+        c = R([1, 2])(PI / 40)(TEXTURE("tegole1.png")(T(1)(re + 0.02)(R([1, 3])(PI / 12 * 4)(T([1, 2])([-0.005, -(angle / 2)])(CUBOID([0.005, angle, 0.25]))))))
+    if(t ==2):
+        c = R([1, 2])(PI / 40)(TEXTURE("tegole1.png")(T(1)(re+0.02)(R([1, 3])(PI / 14* 4)(T([1, 2])([-0.005, -(angle/2)])(CUBOID([0.005, angle, 0.25]))))))
+    if(t==3):
+        c = R([1, 2])(PI / 40)(TEXTURE("tegole1.png")(T(1)(re+0.02)(R([1, 3])(PI / 10 * 4)(T([1, 2])([-0.005, -(angle/2)])(CUBOID([0.005, angle, 0.25]))))))
+    cop = []
+    for i in range(1, 11):
+        frag = R([1, 2])(PI / 20 * (i - 1))(c)
+        cop.append(frag)
+    fragCop = STRUCT(cop)
+    finalCop = STRUCT([fragCop, R([1, 2])(PI / 2)(fragCop), R([1, 2])(PI)(fragCop), R([1, 2])(-PI / 2)(fragCop)])
+
+    return STRUCT([base, T(3)(h)(finalCop)])
+
 
 def villa():
     ground = groundFloor()
@@ -219,7 +347,7 @@ def villa():
 
 #VIEW(groundFloor())
 #VIEW(firstFloor())
-VIEW(villa())
+#VIEW(villa())
 #VIEW(secondFloor())
 
 #VIEW(floor)
@@ -228,3 +356,6 @@ VIEW(villa())
 
 #VIEW(lateralStructure())
 #VIEW(externalStair())
+#VIEW(fragDome([1.77,1.61,0.15, 2]))
+#VIEW(roof())
+
