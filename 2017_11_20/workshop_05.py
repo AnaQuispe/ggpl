@@ -254,7 +254,7 @@ def lateralStructure():
     roof = DIFFERENCE([STRUCT([T(2)(-0.03)(CUBOID([1.63,3.96,0.15])), T([2,3])([-0.06,0.15])(CUBOID([1.66,4.02,0.15]))]), holeRoof])
     finalFirstFloor = STRUCT([wall2, finalDetail, STRUCT(columns), T(3)(3)(roof)])
 
-    # SECOND FLOOR OOF THE LATERAL STRUCTURE STRUCTURE OF THE VILLA
+    # SECOND FLOOR OF THE LATERAL STRUCTURE OF THE VILLA
 
     d4 = STRUCT([T(2)(-0.035)(CUBOID([1.635,3.97,0.17])), T([2,3])([-0.065,0.17])(CUBOID([1.665,4.03,0.05]))])
     detail4 = DIFFERENCE([d4, CUBOID([1.6,3.9,0.3])])
@@ -388,9 +388,111 @@ def villa():
                         T([1,2])([3.65,9.15])(R([1,2])(PI)(lateral)), T([1,2])([5.5,3.65])(R([1,2])(-PI/2)(lateral))])
     return STRUCT([centralStruct, latStruct])
 
+
+def detailWindowDoor(param):
+    if param == "window":
+        det1 = T(3)(0.25)(CUBOID([0.58,0.05,0.05]))
+        det2 = T([1,2,3])([0.03,0.01,0.2])(CUBOID([0.52,0.04,0.05]))
+        det3 = OFFSET([0,0.03,0])(MKPOL([[[0.03,0.02,0.2],[0.04,0.02,0.15],[0.54,0.02,0.15],[0.55,0.02,0.2]],[[1,2,3,4]],[[1]]]))
+        holeWindow = T([1, 3])([0.09, 0.3])(CUBOID([0.4, 0.2, 0.9]))
+        det4 = DIFFERENCE([T([1,2,3])([0.03,0.01,0.3])(CUBOID([0.52,0.04,1.02])), holeWindow])
+        finalDet1 = STRUCT([T([2,3])([-0.02,1.12])(det2), T([2,3])([-0.04,1.17])(det2), det1, det2, det3, det4])
+
+        c1 = DIFFERENCE([T([2,3])([0.06,0.21])(R([1,3])(-PI/2)(MY_CYLINDER([0.06,0.05])(16))),T(2)(0.09)(CUBOID([0.05,0.1,0.27]))])
+        c2 = T([2, 3])([0.07, 0.03])(R([1, 3])(-PI / 2)(MY_CYLINDER([0.03, 0.05])(16)))
+        c3 = OFFSET([0.05,0,0])(MKPOL([[[0,0.09,0.03],[0,0.005,0.19],[0,0.045,0.19]],[[1,2,3]],[[1]]]))
+
+        finalDet2 = STRUCT([c1,c2,c3])
+
+        d1 = OFFSET([0,0.12,0])(MKPOL([[[0,0,0],[0.345,0,0.2],[0.69,0,0],[0.05,0,0],[0.343,0,0.17],[0.66,0,0],[0.06,0,0.03],
+                                        [0.63,0,0.03]],[[1,2,5,4],[2,3,6,5]],[[1]]]))
+        d2 = OFFSET([0,0.09,0])(MKPOL([[[0,0,0],[0.06,0,0.03],[0.63,0,0.03],[0.69,0,0]],[[1,2,3,4]],[[1]]]))
+
+        finalDet3 = STRUCT([d1, T(2)(0.03)(d2)])
+        finalWindow = T(2)(-0.12)(STRUCT([T(2)(0.07)(finalDet1), T([1,2,3])([-0.02,0.03,1.15])(finalDet2), T([1,2,3])([0.55,0.03,1.15])(finalDet2),
+                           T([1,3])([-0.055,1.42])(finalDet3)]))
+        return finalWindow
+    elif param == "door":
+
+        det1 = STRUCT([T([1,2])([0.195,0.075])(CUBOID([0.72,0.08,1.52])), T([1,2])([0.135,0.115])(CUBOID([0.84,0.04,1.64]))])
+        finalDet1 = DIFFERENCE([det1,T(1)(0.255)(CUBOID([0.6,0.5,1.4]))])
+
+        d1 = OFFSET([0.1,0,0])(MKPOL([[[0,0.135,0.03],[0,0.015,0.255],[0,0.08,0.255]],[[1,2,3]],[[1]]]))
+        d2 =DIFFERENCE([T([2,3])([0.09,0.3])(R([1,3])(-PI/2)(MY_CYLINDER([0.09,0.1])(16))), T(2)(0.135)(CUBOID([0.2,0.7,0.4]))])
+        d3 = T([2, 3])([0.105, 0.03])(R([1, 3])(-PI / 2)(MY_CYLINDER([0.03, 0.1])(16)))
+        finalDet2 = STRUCT([d1,d2,d3])
+
+        c1 = T(2)(0.035)(OFFSET([0,0.12,0])(MKPOL([[[0,0,1.64],[0.555,0,1.87],[1.11,0,1.64],[1.035,0,1.64],[0.075,0,1.64],
+                                         [0.555,0,1.83]],[[1,2,6,5],[2,6,4,3]],[[1]]])))
+        c2 = T(2)(0.065)(OFFSET([0,0.09,0])(MKPOL([[[0,0,1.64],[0.1,0,1.68],[1.01,0,1.68],[1.11,0,1.64]],[[1,2,3,4]],[[1]]])))
+        c3 = T(2)(0.115)(OFFSET([0,0.04,0])(MKPOL([[[1.035,0,1.64],[0.075,0,1.64],[0.555,0,1.83]],[[1,2,3]],[[1]]])))
+        detUp1 = []
+        detr = CUBOID([0.049, 0.035, 0.04])
+        for j in range(1, 10):
+            detr1 = T([1, 3])([0.049 * (j * 2 - 1), 1.6])(detr)
+            detUp1.append(detr1)
+
+        detUp2 = []
+        detr2 = CUBOID([0.046, 0.035, 0.04])
+        for m in range(1, 6):
+            detr3 = T([1, 3])([0.049 * (m * 2 - 1), 1.625 +0.0195 * (m * 2 - 1)])(detr2)
+            detUp2.append(detr3)
+
+        finalDet3 = STRUCT([c1,c2, c3, T([1,2])([0.086,0.08])(STRUCT(detUp1)), T([1,2])([0.089,0.08])(STRUCT(detUp2)),
+                            T([1, 2])([1.02, 0.115])(R([1,2])(PI)(STRUCT(detUp2)))])
+
+        finalDoor = T(2)(-0.155)(STRUCT([finalDet1, T([1,2,3])([0.035,0.02,1.25])(finalDet2),
+                                         T([1,2,3])([0.975,0.02,1.25])(finalDet2), finalDet3]))
+        return finalDoor
+
+def movingStructureBuilder(X, Y, Z, B):
+        """
+        :param X: a list of distances on the X axis
+        :param Y: a list of distances on the Y axis
+        :param Z: a list of distances on the Z axis
+        :param B: a three-dimensional matrix of occupancy
+        :return: a 2nd order function
+        """
+        struct = []
+        x = 0
+        for l in range(0, len(B)):  # for each x
+            y = 0
+            for w in range(0, len(B[l])):  # for each y
+                z = 0
+                for h in range(0, len(B[l][w])):  # for each z
+                    if (w > 0) and (w < len(B[l]) - 1):
+                        if ((B[l][w][h] is True) and (B[l][w - 1][h] is False) and (B[l][w + 1][h] is False)):
+                            struct.append(TEXTURE("grass3.png")(T([1, 2, 3])([x, y, z])(CUBOID([X[l], Y[w], Z[h]]))))
+                        elif (B[l][w][h]):
+                            struct.append(TEXTURE("wood2.png")(T([1, 2, 3])([x, y, z])(CUBOID([X[l], Y[w], Z[h]]))))
+                    elif (B[l][w][h]):
+                        struct.append(TEXTURE("wood2.png")(T([1, 2, 3])([x, y, z])(CUBOID([X[l], Y[w], Z[h]]))))
+
+                    z += Z[h]
+                y += Y[w]
+            x += X[l]
+        pol = STRUCT(struct)
+
+        return pol
+def window():
+
+        wx = [0.04,0.14,0.04,0.14,0.04]
+        wy = [0.04,0.02,0.04]
+        wz = [0.04,0.6,0.04,0.18,0.04]
+        wb = [[[True,True,True,True,True],[True,True,True,True,True],[True,True,True,True,True]],
+              [[True,False,True,False,True],[True,True,True,False,True],[True,False,True,False,True]],
+              [[True,True,True,False,True],[True,True,True,False,True],[True,True,True,False,True]],
+              [[True, False, True, False, True], [True, True, False, True, True], [True, False, True, False, True]],
+              [[True, True, True, True, True], [True, True, True, True, True], [True, True, True, True, True]]
+             ]
+        glass = TEXTURE("grass3.png")(OFFSET([0,0.024,0])(MKPOL([[[0.04,0.038,0.68],[0.04,0.038,0.86],[0.36,0.038,0.86],
+                                                                  [0.36,0.038,0.68]],[[1,2,3,4]],[[1]]])))
+        return STRUCT([movingStructureBuilder(wx, wy, wz, wb),glass])
+
+
 #VIEW(groundFloor())
 #VIEW(firstFloor())
-VIEW(villa())
+#VIEW(villa())
 #VIEW(secondFloor())
 #VIEW(floor)
 #VIEW(balcony())
@@ -398,4 +500,5 @@ VIEW(villa())
 #VIEW(externalStair())
 #VIEW(fragDome([1.77,1.61,0.15, 2]))
 #VIEW(roof())
-
+#VIEW(detailWindowDoor("window"))
+VIEW(window())
