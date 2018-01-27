@@ -4,7 +4,7 @@ from numpy import *
 import csv
 
 
-def INTERNAL_DOORS(filename,hDoor):
+def fileReader(filename,h):
     with open(filename, "rb") as file:
         reader = csv.reader(file, delimiter=",")
         externalWalls = []
@@ -15,44 +15,14 @@ def INTERNAL_DOORS(filename,hDoor):
             y1 = float(row[2])
             y2 = float(row[3])
             externalWalls.append(OFFSET([0.15, 0.15])(POLYLINE([[x1, y1], [x2, y2]])))
-        doors = PROD([STRUCT(externalWalls), Q(hDoor)])
+        doors = PROD([STRUCT(externalWalls), Q(h)])
 
     return doors
 
-def WINDOWS(filename, hWindow):
-
-    with open(filename, "rb") as file:
-        reader = csv.reader(file, delimiter=",")
-        externalWalls = []
-
-        for row in reader:
-            x1 = float(row[0])
-            x2 = float(row[1])
-            y1 = float(row[2])
-            y2 = float(row[3])
-            externalWalls.append(OFFSET([0.15, 0.15])(POLYLINE([[x1, y1], [x2, y2]])))
-        window = PROD([STRUCT(externalWalls), Q(hWindow)])
-
-    return window
-
-def WALLS(filename, hWall):
-    with open(filename, "rb") as file:
-        reader = csv.reader(file, delimiter=",")
-        externalWalls = []
-
-        for row in reader:
-            x1 = float(row[0])
-            x2 = float(row[1])
-            y1 = float(row[2])
-            y2 = float(row[3])
-            externalWalls.append(OFFSET([0.15, 0.15])(POLYLINE([[x1, y1], [x2, y2]])))
-        walls = PROD([STRUCT(externalWalls), Q(hWall)])
-
-    return walls
 
 def groundFloor():
 
-    walls = WALLS("walls.lines", 1.1)
+    walls = fileReader("walls.lines", 1.1)
     det1 = T([1,2])([-0.03,-0.03])(CUBOID([7.41, 0.03,0.5]))
     det2 = T([1,2])([-0.06,-0.06])(CUBOID([7.47, 0.03,0.3]))
     det3 = T([1, 2, 3])([-0.06, -0.06, 0.95])(CUBOID([7.47, 0.06, 0.15]))
@@ -61,30 +31,50 @@ def groundFloor():
     detailWall3 = STRUCT([det3, T(2)(7.41)(det3), T(1)(-0.06)(R([1, 2])(PI / 2)(det3)), T(1)(7.35)(R([1, 2])(PI / 2)(det3))])
 
     finalWall = STRUCT([walls,detailWall1, detailWall2, detailWall3])
-    door = STRUCT([CUBOID([0.6, 0.21, 0.7]), T([1, 3])([0.3, 0.7])(R([2, 3])(-PI / 2)(MY_CYLINDER([0.3, 0.21])(16)))])
+    door = CUBOID([0.6, 0.21, 0.9])
     doors_hole = STRUCT([T([1, 2])([3.4, -0.06])(door), T([1, 2])([3.4, 7.2])(door),
                          T([1, 2])([0.15, 3.4])(R([1, 2])(PI / 2)(door)),
                          T([1, 2])([7.41, 3.4])(R([1, 2])(PI / 2)(door))])
 
-    inDoor = STRUCT([R([1, 2])(PI/4)(T([1,2])([3.1,-0.175])(CUBOID([4.2, 0.35, 0.75]))), T(1)(7.3)(R([1, 2])(3 * PI / 4)
-                    (T([1, 2])([3.1,-0.175])(CUBOID([4.2,0.35,0.75])))),T([1,2])([3.4, 1.85])(OFFSET([0.0, 4.0])(door)),
+    inDoor = STRUCT([R([1, 2])(PI / 4)(T([1, 2])([3.1, -0.15])(CUBOID([4.2, 0.3, 0.75]))),
+                     T(1)(7.4)(R([1, 2])(3 * PI / 4)(T([1, 2])([3.1, -0.15])(CUBOID([4.2, 0.3, 0.75])))),
+                     T([1,2])([3.4, 1.85])(OFFSET([0.0, 4.0])(door)),
                      T([1, 2])([1.7, 4.05])(R([1, 2])(-PI / 2)(OFFSET([0.0, 4.0])(S(1)([0.75 / 0.6])(door))))])
 
     center = DIFFERENCE([T([1, 2])([3.7, 3.675])(DIFFERENCE([MY_CYLINDER([1.71, 1.1])(32),MY_CYLINDER([1.21, 1.1])(32)]))])
 
-    holes = STRUCT([INTERNAL_DOORS("internalDoors.lines", 0.7), T(3)(0.575)(WINDOWS("windows2.lines", 0.3)), doors_hole,
+    holes = STRUCT([fileReader("internalDoors.lines", 1), T(3)(0.575)(fileReader("windows2.lines", 0.3)), doors_hole,
                     inDoor])
     floor = STRUCT([TEXTURE("marmo_rosso2.png")(T(3)(0.001)(MKPOL([[[0,0],[0,7.35],[7.35,0],[7.35,7.35]],[[1, 2, 3, 4]],
                     [[1]]]))), COLOR([1, 0.92, 0.84])(T(3)(-0.011)(CUBOID([7.35, 7.35, 0.01])))])
     finalGroundFloor = COLOR([1, 0.92, 0.84])(DIFFERENCE([STRUCT([finalWall, center]), holes]))
 
+    w1 = T([2, 3])([0.02, 0.575])(window(3))
+    detw1 = STRUCT([T(1)(0.6)(w1), T(1)(2.1)(w1), T(1)(4.9)(w1),T(1)(6.35)(w1)])
+    detw2 = STRUCT([T([1,2])([0.07,0.8])(R([1, 2])(PI / 2)(w1)), T([1,2])([0.07,2.1])(R([1, 2])(PI / 2)(w1)),
+                    T([1, 2])([0.07, 4.9])(R([1, 2])(PI / 2)(w1)),T([1,2])([0.07,6.1])(R([1, 2])(PI / 2)(w1))])
 
-    return STRUCT([finalGroundFloor, floor])
+    finalDetw = STRUCT([detw1, T(1)(0.02)(detw2), T(2)(7.26)(detw1), T(1)(7.28)(detw2)])
+
+    d1 = T(1)(3.4)(puerta(2))
+    finalDetd = STRUCT([d1, T(1)(7.35)(R([1, 2])(PI / 2)(d1)), T(2)(7.4)(R([1, 2])(-PI / 2)(d1)),
+                        T([1, 2])([7.4, 7.35])(R([1, 2])(PI)(d1))])
+    p = puerta(3)
+    p_v = STRUCT([T([1,2])([0.6,1.875])(p),T([1,2])([0.6,3.175])(p),T([1,2])([0.6,4.075])(p),T([1,2])([0.6,5.375])(p)])
+    p_h = STRUCT([T([1,2])([2.975,0.75])(R([1,2])(PI/2)(puerta(5))),T([1,2])([2.975,6.15])(R([1,2])(PI/2)(puerta(5)))])
+    finalIntDoors = STRUCT([p_v,p_h,T(1)(5.8)(p_v),T(1)(1.525)(p_h)])
+
+    intd = T([1, 2])([1.2, 0.15])(R([1, 2])(-PI / 2)(puerta(4)))
+    finalIntd = STRUCT([R([1, 2])(PI / 4)(intd), R([1, 2])(3 * PI / 4)(T([1, 2])([0.096, 0.085])(intd)),
+                        R([1, 2])(-3 * PI / 4)(T([1, 2])([0.205, -0.002])(intd)),
+                        R([1, 2])(-PI / 4)(T([1, 2])([0.1165, -0.086])(intd))])
+    return STRUCT([finalGroundFloor, floor, finalDetw, finalDetd, finalIntDoors,T([1,2])([3.76,3.76])(finalIntd)])
+
 
 
 def firstFloor():
 
-    walls = WALLS("walls.lines", 2.2)
+    walls = fileReader("walls.lines", 2.2)
     det1 = T([1, 2])([-0.03, -0.03])(CUBOID([7.41, 0.03, 0.15]))
     det2 = T([1, 2])([-0.06, -0.06])(CUBOID([7.47, 0.06, 0.15]))
     detailWall1 = STRUCT([det1, T(2)(7.38)(det1), T(1)(-0.03)(R([1, 2])(PI / 2)(det1)), T(1)(7.35)(R([1, 2])(PI / 2)(det1))])
@@ -108,44 +98,107 @@ def firstFloor():
 
     center1 = T([1, 2])([3.7,3.675])(DIFFERENCE([MY_CYLINDER([1.45,2.16])(32),MY_CYLINDER([1.35,2.16])(32)]))
     center2 = T([1, 2,3])([3.7, 3.675, 2.16])(DIFFERENCE([MY_CYLINDER([1.71, 0.04])(32), MY_CYLINDER([1.18, 0.04])(32)]))
-    holes = STRUCT([INTERNAL_DOORS("internalDoors.lines", 1.4), T(3)(0.3)(WINDOWS("windows.lines", 0.9)), externalDoorHole,
+    holes = STRUCT([fileReader("internalDoors.lines", 1), T(3)(0.3)(fileReader("windows.lines", 0.9)), externalDoorHole,
                     internalDoor, T(3)(1.25)(internalWindow)])
 
     floor = STRUCT([TEXTURE("marmo_rosso2.png")(T(3)(0.001)(MKPOL([[[0,0],[0,7.35],[7.35,0],[7.35,7.35]],[[1, 2, 3, 4]],
                     [[1]]]))), COLOR([1, 0.92, 0.84])(T(3)(-0.011)(CUBOID([7.35,7.35,0.01])))])
 
 
-    finalFirstFloor = COLOR([1, 0.92, 0.84])(DIFFERENCE([STRUCT([finalWalls, center1]), holes]))
+    finalFirst = COLOR([1, 0.92, 0.84])(DIFFERENCE([STRUCT([finalWalls, center1]), holes]))
 
-    return STRUCT([finalFirstFloor, floor, COLOR([1, 0.92, 0.84])(center2), T([1, 2,3])([3.7, 3.675, 1.9])
-                    (detailDome([1.35,1.22, 1.3,0.13,0.07])([1.22,1.18, 0.03]))])
+    detw = STRUCT([detailWindow(1),T([1,3])([0.09,0.3])(window(1))])
+    detw1 = STRUCT([ T(1)(0.51)(detw), T(1)(6.26)(detw)])
+    detw2 = STRUCT([T(2)(1.29)(R([1,2])(-PI/2)(detw)),T(2)(6.59)(R([1,2])(-PI/2)(detw))])
+    finalDetw = STRUCT([detw1,detw2,T([1,2])([7.35,7.35])(R([1,2])(PI)(detw1)), T([1,2])([7.35,7.35])(R([1,2])(-PI)(detw2))])
+
+    detd = T(1)(3.145)(STRUCT([detailDoor(1),T(1)(0.255)(puerta(1))]))
+    finalDetd = STRUCT([detd,T(1)(7.35)(R([1,2])(PI/2)(detd)), T(2)(7.4)(R([1,2])(-PI/2)(detd)), T([1,2])([7.4,7.35])(R([1,2])(PI)(detd))])
+
+    w1 = window(1)
+    finalW1 = STRUCT([T([1,2,3])([2.1,0.02,0.3])(w1),T([1,2,3])([4.9,0.02,0.3])(w1),
+                      T([1,2,3])([2.1,7.23,0.3])(w1), T([1,2,3])([4.9,7.23,0.3])(w1)])
+    w2 = T([1,3])([0.077,0.3])(R([1,2])(PI/2)(window(4)))
+    w2det = STRUCT([T(2)(2.1)(w2),T(2)(2.75)(w2),T(2)(4.25)(w2),T(2)(4.95)(w2), T([1,2])([7.271,2.1])(w2),
+                    T([1,2])([7.271,2.75])(w2), T([1,2])([7.271,4.25])(w2), T([1,2])([7.271,4.95])(w2)])
+
+    p = puerta(3)
+    p_v = STRUCT([T([1, 2])([0.6, 1.875])(p), T([1, 2])([0.6, 3.175])(p), T([1, 2])([0.6, 4.075])(p),
+                  T([1, 2])([0.6, 5.375])(p)])
+    p_h = STRUCT([T([1, 2])([2.975, 0.75])(R([1, 2])(PI / 2)(puerta(5))),
+                  T([1, 2])([2.975, 6.15])(R([1, 2])(PI / 2)(puerta(5)))])
+    finalIntDoors = STRUCT([p_v, p_h, T(1)(5.8)(p_v), T(1)(1.525)(p_h)])
+
+    intd = T([1,2])([1.23,0.15])(R([1,2])(-PI/2)(STRUCT([detailDoor(2),puerta(4)])))
+    finalIntd = STRUCT([R([1,2])(PI/4)(intd), R([1,2])(3*PI/4)(T([1,2])([0.096,0.085])(intd)),R([1,2])(-3*PI/4)(T([1,2])([0.205, -0.002])(intd)),
+                        R([1,2])(-PI/4)(T([1,2])([0.1165,-0.086])(intd))])
+
+    intw = T([1,2,3])([1.23,0.15,1.25])(R([1,2])(-PI/2)(detailWindow(2)))
+    finalIntw = STRUCT([R([1, 2])(PI / 4)(intw), R([1, 2])(3 * PI / 4)(T([1, 2])([0.096, 0.085])(intw)),
+                        R([1, 2])(-3 * PI / 4)(T([1, 2])([0.205, -0.002])(intw)),
+                        R([1, 2])(-PI / 4)(T([1, 2])([0.1165, -0.086])(intw))])
+
+    sp = T(1)(0.075)(DIFFERENCE(
+        [T(2)(-0.085)(CUBOID([0.25, 0.17, 0.055])), R([1, 2])(PI / 12)(T(2)(0.17)(CUBOID([0.35, 0.17, 0.055])))]))
+
+    stairInt = []
+    stairInt.append(sp)
+    for i in range(1, 40):
+        step = T(3)(0.055 * i)(R([1, 2])(PI / 8 * i)(sp))
+        stairInt.append(step)
+    stair = STRUCT(stairInt)
+    finalStair = COLOR([1, 0.92, 0.84])(STRUCT([T([1,2])([5,4.9])(stair),T([1,2])([4.9,2.35])(R([1,2])(-PI/2)(stair)),
+                         T([1, 2])([2.35, 2.25])(R([1, 2])(-PI / 2)(stair)),T([1,2])([2.25,5])(R([1,2])(-PI)(stair))]))
+    finalFirstDoor = STRUCT([finalFirst, floor, COLOR([1, 0.92, 0.84])(center2), T([1, 2, 3])([3.7, 3.675, 1.9])
+    (detailDome([1.35, 1.22, 1.3, 0.13, 0.07])([1.22, 1.18, 0.03])), finalDetw, finalDetd, finalW1, w2det,
+                             finalIntDoors, T([1,2])([3.76,3.76])(finalIntd),T([1,2])([3.76,3.76])(finalIntw),
+                             finalStair])
+    return finalFirstDoor
 
 def secondFloor():
-    walls = WALLS("walls.lines", 1.1)
+    walls = fileReader("walls.lines", 1.1)
 
     det1 = T([1, 2])([-0.045, -0.045])(CUBOID([7.44, 0.045, 0.25]))
     det2 = T([1, 2,3])([-0.07, -0.07,0.25])(CUBOID([7.49, 0.07, 0.05]))
     detailWall1 = STRUCT([det1, T(2)(7.395)(det1), T(1)(-0.045)(R([1, 2])(PI / 2)(det1)), T(1)(7.35)(R([1, 2])(PI / 2)(det1))])
     detailWall2 = STRUCT([det2, T(2)(7.42)(det2), T(1)(-0.07)(R([1, 2])(PI / 2)(det2)), T(1)(7.35)(R([1, 2])(PI / 2)(det2))])
     finalWall = STRUCT([walls, detailWall1,detailWall2])
-    externalDoor = CUBOID([0.6, 0.22, 0.9])
+    externalDoor = CUBOID([0.6, 0.22, 0.85])
     externalDoorHole = STRUCT([T([1, 2])([3.4, -0.07])(externalDoor), T([1, 2])([3.4, 7.2])(externalDoor),
                                T([1, 2])([0.15, 3.4])(R([1, 2])(PI / 2)(externalDoor)),
                                T([1, 2])([7.42, 3.4])(R([1, 2])(PI / 2)(externalDoor))])
 
-    inDoor = STRUCT([R([1, 2])(PI / 4)(T([1, 2])([3.1, -0.175])(CUBOID([4.2,0.35,0.75]))), T(1)(7.3)(R([1, 2])(3 * PI/4)
-                    (T([1, 2])([3.1, -0.175])(CUBOID([4.2, 0.35,0.75]))))])
+    inDoor = STRUCT([R([1, 2])(PI / 4)(T([1, 2])([3.1, -0.15])(CUBOID([4.2, 0.3, 0.75]))),
+                     T(1)(7.4)(R([1, 2])(3 * PI / 4)(T([1, 2])([3.1, -0.15])(CUBOID([4.2, 0.3, 0.75]))))])
 
     center = DIFFERENCE([T([1, 2])([3.7,3.675])(DIFFERENCE([MY_CYLINDER([1.71,1.1])(32), MY_CYLINDER([1.61, 1.1])(32)]))])
 
-    holes = STRUCT([INTERNAL_DOORS("internalDoors2.lines", 0.9), T(3)(0.6)(WINDOWS("windows2.lines", 0.3)),
+    holes = STRUCT([fileReader("internalDoors2.lines", 1), T(3)(0.6)(fileReader("windows2.lines", 0.3)),
                     inDoor, externalDoorHole])
     floorBase = COLOR(BROWN)((DIFFERENCE(
         [T(3)(-0.014)(CUBOID([7.35, 7.35, 0.015])), T([1, 2, 3])([2, 2, -0.014])(CUBOID([3.35, 3.35, 0.015]))])))
 
     finalGroundFloor = COLOR([1, 0.92, 0.84])(DIFFERENCE([STRUCT([finalWall, center]), holes]))
+    w1 = T([2, 3])([0.02, 0.6])(window(2))
+    detw1 = STRUCT([T(1)(0.6)(w1), T(1)(2.1)(w1), T(1)(4.9)(w1), T(1)(6.35)(w1)])
+    detw2 = STRUCT([T([1, 2])([0.07, 0.8])(R([1, 2])(PI / 2)(w1)), T([1, 2])([0.07, 2.1])(R([1, 2])(PI / 2)(w1)),
+                    T([1, 2])([0.07, 4.9])(R([1, 2])(PI / 2)(w1)), T([1, 2])([0.07, 6.1])(R([1, 2])(PI / 2)(w1))])
 
-    return STRUCT([finalGroundFloor, floorBase])
+    finalDetw = STRUCT([detw1, T(1)(0.07)(detw2), T(2)(7.21)(detw1), T(1)(7.28)(detw2)])
+    p = puerta(3)
+    p_v = STRUCT([T([1, 2])([0.6, 1.875])(p), T([1, 2])([0.6, 3.175])(p), T([1, 2])([0.6, 4.075])(p),
+                  T([1, 2])([0.6, 5.375])(p)])
+    p_h = STRUCT([T([1, 2])([2.975, 0.75])(R([1, 2])(PI / 2)(puerta(5))),
+                  T([1, 2])([2.975, 6.15])(R([1, 2])(PI / 2)(puerta(5)))])
+    finalIntDoors = STRUCT([p_v, p_h, T(1)(5.8)(p_v), T(1)(1.525)(p_h)])
+    d1 = T(1)(3.4)(puerta(2))
+    finalDetd = STRUCT([d1, T(1)(7.35)(R([1, 2])(PI / 2)(d1)), T(2)(7.4)(R([1, 2])(-PI / 2)(d1)),
+                        T([1, 2])([7.4, 7.35])(R([1, 2])(PI)(d1))])
+    intd = T([1, 2])([1.5, 0.15])(R([1, 2])(-PI / 2)(puerta(4)))
+    finalIntd = STRUCT([R([1, 2])(PI / 4)(intd), R([1, 2])(3 * PI / 4)(T([1, 2])([0.096, 0.085])(intd)),
+                        R([1, 2])(-3 * PI / 4)(T([1, 2])([0.205, -0.002])(intd)),
+                        R([1, 2])(-PI / 4)(T([1, 2])([0.1165, -0.086])(intd))])
+    return STRUCT([finalGroundFloor, floorBase, finalDetw, finalIntDoors, finalDetd,T([1,2])([3.76,3.76])(finalIntd)])
 
 
 
@@ -209,18 +262,24 @@ def lateralStructure():
 
     # GROUND FLOOR OF THE LATERAL STRUCTURE OF THE VILLA
 
-    w1 = CUBOID([3.65, 0.25,0.95])
+    w1 = CUBOID([1.6, 0.25,0.95])
+    w12 = T(1)(1.6)(CUBOID([2.05, 0.25,0.95]))
     det = DIFFERENCE([STRUCT([T(2)(-0.06)(CUBOID([3.71,0.37,0.3])),T(2)(-0.03)(CUBOID([3.68,0.31,0.5]))]), w1])
+    detw12 = T(1)(1.6)(DIFFERENCE([STRUCT([T(2)(-0.06)(CUBOID([2.11,0.37,0.3])),T(2)(-0.03)(CUBOID([2.08,0.31,0.5]))]), w12]))
     wall1 = STRUCT([w1, T(2)(3.65)(w1), T([1,2])([1.3,0.25])(CUBOID([0.15,3.4,0.95])), det, T(2)(3.65)(det)])
-    roof = MKPOL([[[0,-0.06],[3.71,-0.06],[3.71,0.31],[1.6,0.31],[1.6,3.59],[3.71,3.59],[3.71,3.96],[0,3.96],[0,0.31],[0,3.59]],
-                  [[1,2,3,9],[10,5,6,7,8],[9,4,5,10]],[[1]]])
+    wall12 = STRUCT([w12, T(2)(3.65)(w12), detw12, T(2)(3.65)(detw12)])
+    roof = T([2,3])([-0.06,0.95])(CUBOID([1.6,4.02,0.15]))
     d1 = STRUCT([T(2)(-0.1)(CUBOID([0.8,0.5,0.65])), DIFFERENCE([T([1,2,3])([0.4,0.31,-0.095])(R([2,3])(PI/2)(MY_CYLINDER([0.85,0.31])(32))),
                                                       T([1,3])([-0.7,-1.3])(CUBOID([2,0.31,1.95]))])])
     hw = T([1,3])([1.6,0.575])(CUBOID([0.4,0.25,0.3]))
-    holeDoor = STRUCT([T([1,2])([0.25,-0.06])(d1), T([1,2])([0.25,3.65])(d1), T([1,2])([1.3,1.65])(CUBOID([0.15,0.6,0.8])),
-                       hw, T(2)(3.65)(hw)])
-    finalRoof = T(3)(0.95)(PROD([roof, Q(0.15)]))
-    finalGroundFloor = STRUCT([DIFFERENCE([STRUCT([wall1, finalRoof]), holeDoor]), T([1,2])([1.6,0.25])(externalStair())])
+    holeDoor = STRUCT([T([1,2])([0.25,-0.06])(d1), T([1,2])([0.25,3.65])(d1), T([1,2])([1.3,1.65])(CUBOID([0.15,0.6,0.9]))])
+    holew12 = STRUCT([hw, T(2)(3.65)(hw)])
+    m = T([1,3])([1.6,0.95])(CUBOID([2.11,0.37,0.15]))
+    finalStair = STRUCT([T([1,2])([1.6,0.25])(externalStair()), DIFFERENCE([wall12,holew12]), T(2)(-0.06)(m), T(2)(3.59)(m)])
+
+    wind = T([1,2, 3])([1.6,0.02,0.575])(window(3))
+    winds = STRUCT([wind, T(2)(3.81)(wind), T([1,2])([1.32,2.25])(R([1,2])(-PI/2)(puerta(2)))])
+    finalGroundFloor = STRUCT([DIFFERENCE([STRUCT([wall1,roof]), holeDoor]), finalStair, winds])
 
     # FIRST FLOOR OF THE LATERAL STRUCTURE OF THE VILLA
 
@@ -287,12 +346,17 @@ def lateralStructure():
 
     dtroof = STRUCT([T([1,2,3])([1.35,0.05,0.33])(CUBOID([0.2,0.2,0.15])), TEXTURE("tegole4.png")(T([1,2,3])([1.32,0.02,0.48])
                                                                                                   (CUBOID([0.26,0.26,0.05])))])
+    windowC = R([1, 3])(-PI / 2)(
+        STRUCT([TEXTURE("wood2.png")(DIFFERENCE([MY_CYLINDER([0.1, 0.07])(16), MY_CYLINDER([0.075, 0.07])(16)])),
+                TEXTURE("grass3.png")(T(3)(0.03)(MY_CYLINDER([0.075, 0.01])(16)))]))
     finalDetRoof = STRUCT([STRUCT(detRoof1), T(2)(3.995)(STRUCT(detRoof1)), T(2)(-0.0305)(STRUCT(detRoof2)),
                            T([1,2])([3.23,3.9])(R([1,2])(PI)(roof4)), roof4,dtroof,T(2)(3.6)(dtroof), T([2,3])([1.8,0.66])(dtroof)])
     finalWall3 = STRUCT([detail4,DIFFERENCE([wall3, holeWall3]), roof1, roof2, roof3,finalDetRoof])
 
+    finalLateral = COLOR([1, 0.92, 0.84])(STRUCT([finalGroundFloor, finalFirstFloor, T(3)(3.3)(finalWall3)]))
 
-    return COLOR([1, 0.92, 0.84])(STRUCT([finalGroundFloor, finalFirstFloor, T(3)(3.3)(finalWall3)]))
+
+    return STRUCT([finalLateral, T([1,2,3])([1.51,1.22,3.75])(windowC), T([1,2,3])([1.51,2.68,3.75])(windowC)])
 
 # this function return a half of sphere
 def HALFSPHERE(radius):
@@ -321,7 +385,7 @@ def roof():
                               T([1,2,3])([3.7,3.675,-0.12])(MY_CYLINDER([1.61, 1.9])(32))])
 
     finalRoof = COLOR([1, 0.92, 0.84])(STRUCT([bigRoof, centerWalls]))
-    dome = T([1, 2, 3])([3.7, 3.675, 0.62])(HALFSPHERE(1.6)([32, 32]))
+    dome = T([1, 2])([3.7, 3.675])(TEXTURE("cupola.png")(HALFSPHERE(1.6)([32, 32])))
 
     frag1 = fragDome([1.77,1.61,0.15,1])
     frag2 = fragDome([1.61,1.52,0.15,3])
@@ -389,8 +453,8 @@ def villa():
     return STRUCT([centralStruct, latStruct])
 
 
-def detailWindowDoor(param):
-    if param == "window":
+def detailWindow(type):
+    if type == 1:
         det1 = T(3)(0.25)(CUBOID([0.58,0.05,0.05]))
         det2 = T([1,2,3])([0.03,0.01,0.2])(CUBOID([0.52,0.04,0.05]))
         det3 = OFFSET([0,0.03,0])(MKPOL([[[0.03,0.02,0.2],[0.04,0.02,0.15],[0.54,0.02,0.15],[0.55,0.02,0.2]],[[1,2,3,4]],[[1]]]))
@@ -411,8 +475,29 @@ def detailWindowDoor(param):
         finalDet3 = STRUCT([d1, T(2)(0.03)(d2)])
         finalWindow = T(2)(-0.12)(STRUCT([T(2)(0.07)(finalDet1), T([1,2,3])([-0.02,0.03,1.15])(finalDet2), T([1,2,3])([0.55,0.03,1.15])(finalDet2),
                            T([1,3])([-0.055,1.42])(finalDet3)]))
-        return finalWindow
-    elif param == "door":
+        return COLOR([1, 0.92, 0.84])(finalWindow)
+    elif type == 2:
+
+        d1 = T(2)(-0.04)(DIFFERENCE([T([1, 3])([-0.04, -0.04])(CUBOID([0.38, 0.04, 0.38])), CUBOID([0.3, 0.04, 0.3])]))
+        d2 = T([1, 2, 3])([-0.04, -0.07, 0.34])(CUBOID([0.38, 0.07, 0.04]))
+        d3 = T([1, 2, 3])([-0.12, -0.10, 0.38])(CUBOID([0.54, 0.10, 0.04]))
+        finalDet1 = STRUCT([d1, d2, d3])
+
+        c1 = DIFFERENCE([T([2, 3])([0.06, 0.21])(R([1, 3])(-PI / 2)(MY_CYLINDER([0.06, 0.05])(16))),
+                         T(2)(0.09)(CUBOID([0.05, 0.1, 0.27]))])
+        c2 = T([2, 3])([0.07, 0.03])(R([1, 3])(-PI / 2)(MY_CYLINDER([0.03, 0.05])(16)))
+        c3 = OFFSET([0.05, 0, 0])(MKPOL([[[0, 0.09, 0.03], [0, 0.005, 0.19], [0, 0.045, 0.19]], [[1, 2, 3]], [[1]]]))
+
+        finalDet2 = T([2, 3])([-0.09, 0.11])(STRUCT([c1, c2, c3]))
+
+        final = STRUCT([finalDet1, T(1)(-0.09)(finalDet2), T(1)(0.34)(finalDet2)])
+
+        return COLOR([1, 0.92, 0.84])(final)
+
+
+
+def detailDoor(type):
+    if type == 1:
 
         det1 = STRUCT([T([1,2])([0.195,0.075])(CUBOID([0.72,0.08,1.52])), T([1,2])([0.135,0.115])(CUBOID([0.84,0.04,1.64]))])
         finalDet1 = DIFFERENCE([det1,T(1)(0.255)(CUBOID([0.6,0.5,1.4]))])
@@ -443,9 +528,33 @@ def detailWindowDoor(param):
 
         finalDoor = T(2)(-0.155)(STRUCT([finalDet1, T([1,2,3])([0.035,0.02,1.25])(finalDet2),
                                          T([1,2,3])([0.975,0.02,1.25])(finalDet2), finalDet3]))
-        return finalDoor
+        return COLOR([1, 0.92, 0.84])(finalDoor)
 
-def movingStructureBuilder(X, Y, Z, B):
+    elif type ==2:
+        d1 = DIFFERENCE([T([1, 2])([-0.04, -0.04])(CUBOID([0.38, 0.04, 0.83])), T(2)(-0.04)(CUBOID([0.3, 0.04, 0.75]))])
+        d2 = T([1, 2, 3])([-0.04, -0.06, 0.83])(CUBOID([0.38, 0.06, 0.04]))
+        finalDet1 = STRUCT([d1, d2, T([2, 3])([-0.02, 0.04])(d2)])
+
+        c1 = DIFFERENCE([T([2, 3])([0.06, 0.21])(R([1, 3])(-PI / 2)(MY_CYLINDER([0.06, 0.05])(16))),
+                         T(2)(0.09)(CUBOID([0.05, 0.1, 0.27]))])
+        c2 = T([2, 3])([0.07, 0.03])(R([1, 3])(-PI / 2)(MY_CYLINDER([0.03, 0.05])(16)))
+        c3 = OFFSET([0.05, 0, 0])(MKPOL([[[0, 0.09, 0.03], [0, 0.005, 0.19], [0, 0.045, 0.19]], [[1, 2, 3]], [[1]]]))
+
+        finalDet2 = T([2, 3])([-0.09, 0.64])(STRUCT([c1, c2, c3]))
+
+        b1 = OFFSET([0, 0.12, 0])(MKPOL(
+            [[[-0.12, -0.12, 0.91], [0.15, -0.12, 1.11], [0.42, -0.12, 0.91], [0.37, -0.12, 0.91], [0.15, -0.12, 1.08],
+              [-0.07, -0.12, 0.91]], [[1, 2, 5, 6], [2, 3, 4, 5]], [[1]]]))
+        b2 = OFFSET([0, 0.09, 0])(MKPOL(
+            [[[-0.08, -0.09, 0.91], [-0.03, -0.09, 0.94], [0.37, -0.09, 0.94], [0.42, -0.09, 0.91]], [[1, 2, 3, 4]],
+             [[1]]]))
+
+        finalDet3 = STRUCT([b1, b2])
+
+        return COLOR([1, 0.92, 0.84])(STRUCT([finalDet1, T(1)(-0.09)(finalDet2), T(1)(0.34)(finalDet2), finalDet3]))
+
+
+def movingStructureBuilderWindow(X, Y, Z, B):
         """
         :param X: a list of distances on the X axis
         :param Y: a list of distances on the Y axis
@@ -474,8 +583,41 @@ def movingStructureBuilder(X, Y, Z, B):
         pol = STRUCT(struct)
 
         return pol
-def window():
 
+
+def movingStructureBuilderDoor(X, Y, Z, B):
+    """
+    :param X: a list of distances on the X axis
+    :param Y: a list of distances on the Y axis
+    :param Z: a list of distances on the Z axis
+    :param B: a three-dimensional matrix of occupancy
+    :return: a 2nd order function
+    """
+    struct = []
+    x = 0
+    for l in range(0, len(B)):  # for each x
+        y = 0
+        for w in range(0, len(B[l])):  # for each y
+            z = 0
+            for h in range(0, len(B[l][w])):  # for each z
+                if (w > 0) and (w < len(B[l]) - 1):
+                    if ((B[l][w][h] is True) and (B[l][w - 1][h] is False) and (B[l][w + 1][h] is False)):
+                        struct.append(TEXTURE("wood2.png")(T([1, 2, 3])([x, y, z])(CUBOID([X[l], Y[w], Z[h]]))))
+                    elif (B[l][w][h]):
+                        struct.append(TEXTURE("wood2.png")(T([1, 2, 3])([x, y, z])(CUBOID([X[l], Y[w], Z[h]]))))
+                elif (B[l][w][h]):
+                    struct.append(TEXTURE("wood2.png")(T([1, 2, 3])([x, y, z])(CUBOID([X[l], Y[w], Z[h]]))))
+
+                z += Z[h]
+            y += Y[w]
+        x += X[l]
+    pol = STRUCT(struct)
+
+    return pol
+
+def window(type):
+
+    if type ==1:
         wx = [0.04,0.14,0.04,0.14,0.04]
         wy = [0.04,0.02,0.04]
         wz = [0.04,0.6,0.04,0.18,0.04]
@@ -487,7 +629,144 @@ def window():
              ]
         glass = TEXTURE("grass3.png")(OFFSET([0,0.024,0])(MKPOL([[[0.04,0.038,0.68],[0.04,0.038,0.86],[0.36,0.038,0.86],
                                                                   [0.36,0.038,0.68]],[[1,2,3,4]],[[1]]])))
-        return STRUCT([movingStructureBuilder(wx, wy, wz, wb),glass])
+        return STRUCT([movingStructureBuilderWindow(wx, wy, wz, wb),glass])
+    elif type == 2:
+        wx = [0.04,0.145,0.03,0.145,0.04]
+        wy = [0.04,0.02,0.04]
+        wz = [0.04,0.22,0.04]
+        wb = [[[True,True,True],[True,True,True],[True,True,True]],
+              [[True,False,True],[True,True,True],[True,False,True]],
+              [[True,True,True],[True,True,True],[True,True,True]],
+              [[True, False, True], [True, True, True], [True, False, True]],
+              [[True, True, True], [True, True, True], [True, True, True]]
+              ]
+        return movingStructureBuilderWindow(wx, wy, wz, wb)
+    elif type ==3:
+        wx = [0.03,0.052,0.02,0.052,0.02,0.052,0.02,0.052,0.02,0.052,0.03]
+        wy = [0.02,0.01,0.02]
+        wz = [0.03,0.032,0.02,0.032,0.02,0.032,0.02,0.032,0.02,0.032,0.03]
+        wb = [[[True,True,True,True,True,True,True,True,True,True,True],
+              [True, True, True, True, True, True, True, True, True, True, True],
+              [True, True, True, True, True, True, True, True, True, True, True]],
+              [[True,False,True,False,True,False,True,False,True,False,True],
+               [True, True, True, True, True, True, True, True, True, True, True],
+               [True, False, True, False, True, False, True, False, True, False, True]],
+              [[True, True, True, True, True, True, True, True, True, True, True],
+               [True, True, True, True, True, True, True, True, True, True, True],
+               [True, True, True, True, True, True, True, True, True, True, True]],
+              [[True, False, True, False, True, False, True, False, True, False, True],
+               [True, True, True, True, True, True, True, True, True, True, True],
+               [True, False, True, False, True, False, True, False, True, False, True]],
+              [[True, True, True, True, True, True, True, True, True, True, True],
+               [True, True, True, True, True, True, True, True, True, True, True],
+               [True, True, True, True, True, True, True, True, True, True, True]],
+              [[True, False, True, False, True, False, True, False, True, False, True],
+               [True, True, True, True, True, True, True, True, True, True, True],
+               [True, False, True, False, True, False, True, False, True, False, True]],
+              [[True, True, True, True, True, True, True, True, True, True, True],
+               [True, True, True, True, True, True, True, True, True, True, True],
+               [True, True, True, True, True, True, True, True, True, True, True]],
+              [[True, False, True, False, True, False, True, False, True, False, True],
+               [True, True, True, True, True, True, True, True, True, True, True],
+               [True, False, True, False, True, False, True, False, True, False, True]],
+              [[True, True, True, True, True, True, True, True, True, True, True],
+               [True, True, True, True, True, True, True, True, True, True, True],
+               [True, True, True, True, True, True, True, True, True, True, True]],
+              [[True, False, True, False, True, False, True, False, True, False, True],
+               [True, True, True, True, True, True, True, True, True, True, True],
+               [True, False, True, False, True, False, True, False, True, False, True]],
+              [[True, True, True, True, True, True, True, True, True, True, True],
+               [True, True, True, True, True, True, True, True, True, True, True],
+               [True, True, True, True, True, True, True, True, True, True, True]]
+              ]
+        return movingStructureBuilderWindow(wx, wy, wz, wb)
+    elif type ==4:
+        wx = [0.02,0.12,0.02,0.12,0.02]
+        wy = [0.03,0.015,0.03]
+        wz = [0.035,0.6,0.04,0.19,0.035]
+        wb = [[[True,True,True,True,True],[True,True,True,True,True],[True,True,True,True,True]],
+              [[True,False,True,False,True],[True,True,True,False,True],[True,False,True,False,True]],
+              [[True,True,True,False,True],[True,True,True,False,True],[True,True,True,False,True]],
+              [[True, False, True, False, True], [True, True, False, True, True], [True, False, True, False, True]],
+              [[True, True, True, True, True], [True, True, True, True, True], [True, True, True, True, True]]
+             ]
+        glass = TEXTURE("grass3.png")(OFFSET([0,0.019,0])(MKPOL([[[0.02,0.028,0.675],[0.02,0.028,0.865],[0.28,0.028,0.865],
+                                                                  [0.28,0.028,0.675]],[[1,2,3,4]],[[1]]])))
+        return STRUCT([movingStructureBuilderWindow(wx, wy, wz, wb),glass])
+
+
+def puerta(type):
+    if type == 1:
+        wx = [0.04, 0.24, 0.04, 0.24, 0.04]
+        wy = [0.02, 0.06, 0.02]
+        wz = [0.04, 0.45, 0.04, 0.45, 0.08, 0.3, 0.04]
+        wb = [[[True, True, True, True, True, True, True],
+               [True, True, True, True, True, True, True],
+               [True, True, True, True, True, True, True]
+               ],
+              [[True, False, True, False, True, False, True],
+               [True, True, True, True, True, True, True],
+               [True, False, True, False, True, False, True]
+               ],
+              [[True, True, True, True, True, True, True],
+               [True, True, True, True, True, True, True],
+               [True, True, True, True, True, True, True]
+               ],
+              [[True, False, True, False, True, False, True],
+               [True, True, True, True, True, True, True],
+               [True, False, True, False, True, False, True]
+               ],
+              [[True, True, True, True, True, True, True],
+               [True, True, True, True, True, True, True],
+               [True, True, True, True, True, True, True]
+               ]
+              ]
+
+        return movingStructureBuilderDoor(wx, wy, wz, wb)
+
+    elif type == 2:
+        wx = [0.05, 0.225, 0.05, 0.225, 0.05]
+        wy = [0.02, 0.06, 0.02]
+        wz = [0.05, 0.375, 0.05, 0.375, 0.05]
+        wb = [[[True, True, True, True, True],[True, True, True, True, True],[True, True, True, True, True]],
+              [[True, False, True, False, True],[True, True, True, True, True],[True, False, True, False, True]],
+              [[True, True, True, True, True],[True, True, True, True, True],[True, True, True, True, True]],
+              [[True, False, True, False, True],[True, True, True, True, True],[True, False, True, False, True]],
+              [[True, True, True, True, True],[True, True, True, True, True],[True, True, True, True, True]]
+             ]
+
+        return movingStructureBuilderDoor(wx, wy, wz, wb)
+
+    elif type ==3:
+
+        wx = [0.05,0.3,0.05]
+        wy = [0.02,0.06,0.02]
+        wz = [0.95,0.05]
+        wb = [[[True,True],[True,True],[True,True]],
+              [[False,True],[True,True],[False,True]],
+              [[True,True],[True,True],[True,True]]
+              ]
+        return movingStructureBuilderDoor(wx, wy, wz, wb)
+
+    elif type == 4:
+        wx = [0.03, 0.24, 0.03]
+        wy = [0.02, 0.04, 0.02]
+        wz = [0.72, 0.03]
+        wb = [[[True, True], [True, True], [True, True]],
+              [[False, True], [True, True], [False, True]],
+              [[True, True], [True, True], [True, True]]
+              ]
+        return movingStructureBuilderDoor(wx, wy, wz, wb)
+
+    else:
+        wx = [0.05, 0.35, 0.05]
+        wy = [0.02, 0.06, 0.02]
+        wz = [0.95, 0.05]
+        wb = [[[True, True], [True, True], [True, True]],
+              [[False, True], [True, True], [False, True]],
+              [[True, True], [True, True], [True, True]]
+              ]
+        return movingStructureBuilderDoor(wx, wy, wz, wb)
 
 
 #VIEW(groundFloor())
@@ -501,4 +780,6 @@ def window():
 #VIEW(fragDome([1.77,1.61,0.15, 2]))
 #VIEW(roof())
 #VIEW(detailWindowDoor("window"))
-VIEW(window())
+#VIEW(window(5))
+#VIEW(puerta(3))
+
