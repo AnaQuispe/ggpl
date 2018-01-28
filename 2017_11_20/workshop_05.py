@@ -67,7 +67,7 @@ def groundFloor():
     finalIntd = STRUCT([R([1, 2])(PI / 4)(intd), R([1, 2])(3 * PI / 4)(T([1, 2])([0.096, 0.085])(intd)),
                         R([1, 2])(-3 * PI / 4)(T([1, 2])([0.205, -0.002])(intd)),
                         R([1, 2])(-PI / 4)(T([1, 2])([0.1165, -0.086])(intd))])
-    return STRUCT([finalGroundFloor, floor, finalDetw, finalDetd, finalIntDoors,T([1,2])([3.76,3.76])(finalIntd), finalDetails])
+    return STRUCT([finalGroundFloor, floor, finalDetw, finalDetd, finalIntDoors,T([1,2])([3.76,3.76])(finalIntd),finalDetails])
 
 
 
@@ -148,11 +148,14 @@ def firstFloor():
     stair = COLOR([1,0.808,0.54])(STRUCT(stairInt))
     finalStair = STRUCT([T([1,2])([5,4.9])(stair),T([1,2])([4.9,2.35])(R([1,2])(-PI/2)(stair)),
                          T([1, 2])([2.35, 2.25])(R([1, 2])(-PI / 2)(stair)),T([1,2])([2.25,5])(R([1,2])(-PI)(stair))])
-    finalFirstDoor = STRUCT([finalFirst, floor, COLOR([1, 0.92, 0.84])(center2), T([1, 2, 3])([3.7, 3.675, 1.9])
-    (detailDome([1.35, 1.22, 1.3, 0.13, 0.07])([1.22, 1.18, 0.03])), finalDetw, finalDetd, finalW1, w2det,
-                             finalIntDoors, T([1,2])([3.76,3.76])(finalIntd),T([1,2])([3.76,3.76])(finalIntw),
-                             finalStair, fm])
+
+    finalDetailsFloor1 = STRUCT([T([1, 2, 3])([3.7, 3.675, 1.9])(detailDome([1.35, 1.22, 1.3, 0.13, 0.07])([1.22, 1.18, 0.03])),
+                                 finalDetw, finalDetd, finalW1, w2det,finalIntDoors, T([1,2])([3.76,3.76])(finalIntd),
+                                 T([1,2])([3.76,3.76])(finalIntw),finalStair, fm])
+    finalFirstDoor = STRUCT([finalFirst, floor, COLOR([1, 0.855, 0.702])(center2), finalDetailsFloor1])
     return finalFirstDoor
+
+
 
 def secondFloor():
 
@@ -170,11 +173,11 @@ def secondFloor():
     inDoor = STRUCT([R([1, 2])(PI / 4)(T([1, 2])([3.1, -0.15])(CUBOID([4.2, 0.3, 0.75]))),
                      T(1)(7.4)(R([1, 2])(3 * PI / 4)(T([1, 2])([3.1, -0.15])(CUBOID([4.2, 0.3, 0.75]))))])
 
-    center = DIFFERENCE([T([1, 2])([3.7,3.675])(DIFFERENCE([MY_CYLINDER([1.71,1.1])(32), MY_CYLINDER([1.61, 1.1])(32)]))])
+    center = DIFFERENCE([T([1, 2])([3.7,3.675])(DIFFERENCE([MY_CYLINDER([1.71,1.1])(32), MY_CYLINDER([1.61, 1.1])(100)]))])
 
     holes = STRUCT([fileReader("internalDoors2.lines", 1), T(3)(0.6)(fileReader("windows2.lines", 0.3)),
                     inDoor, externalDoorHole])
-    floorBase = COLOR(BROWN)((DIFFERENCE(
+    floorBase = COLOR([1,0.808,0.6])((DIFFERENCE(
         [T(3)(-0.014)(CUBOID([7.35, 7.35, 0.015])), T([1, 2, 3])([2, 2, -0.014])(CUBOID([3.35, 3.35, 0.015]))])))
 
     finalGroundFloor = COLOR([1, 0.855, 0.702])(DIFFERENCE([STRUCT([walls, center]), holes]))
@@ -199,7 +202,8 @@ def secondFloor():
                         R([1, 2])(-3 * PI / 4)(T([1, 2])([0.205, -0.002])(intd)),
                         R([1, 2])(-PI / 4)(T([1, 2])([0.1165, -0.086])(intd))])
     return STRUCT([finalGroundFloor, finaldetails,floorBase, finalDetw, finalIntDoors, finalDetd,
-                   T([1,2])([3.76,3.76])(finalIntd)])
+                  T([1,2])([3.76,3.76])(finalIntd)])
+
 
 
 def detailDome(params1):
@@ -387,11 +391,11 @@ def roof():
     base = OFFSET([0,3.9,0])(T(3)(-0.12)(MKPOL([[[-0.03,-0.03,0],[-0.18,-0.18,0.12],[7.53,-0.18,0.12],[7.38,-0.03,0]],[[1,2,3,4]],[[1]]])))
     finalBase = STRUCT([base, T([1,2])([7.35,7.35])(R([1,2])(PI)(base))])
     r1 = OFFSET([0,0,0.04])(MKPOL([[[-0.2,-0.2,0],[3.675,3.675,1.65],[7.55,-0.2,0]],[[1,2,3]],[[1]]]))
-    roof = TEXTURE("tegole3.png")(DIFFERENCE([r1,T([1,2])([3.7,3.675])(MY_CYLINDER([1.71, 1.8])(32))]))
+    roof = TEXTURE("tegole3.png")(DIFFERENCE([r1,T([1,2])([3.7,3.675])(MY_CYLINDER([1.71, 1.8])(64))]))
 
     bigRoof = STRUCT([roof,T(1)(7.35)(R([1,2])(PI/2)(roof)),T([1,2])([7.35,7.35])(R([1,2])(PI)(roof)),T(2)(7.35)(R([1,2])(-PI/2)(roof))])
-    centerWalls = DIFFERENCE([STRUCT([T([1,2])([3.7,3.675])(MY_CYLINDER([1.71, 1.2])(32)), finalBase]),
-                              T([1,2,3])([3.7,3.675,-0.12])(MY_CYLINDER([1.61, 1.9])(32))])
+    centerWalls = DIFFERENCE([STRUCT([T([1,2])([3.7,3.675])(MY_CYLINDER([1.71, 1.2])(64)), finalBase]),
+                              T([1,2,3])([3.7,3.675,-0.12])(MY_CYLINDER([1.61, 1.9])(64))])
 
     finalRoof = COLOR([1, 0.855, 0.702])(STRUCT([bigRoof, centerWalls]))
     dome = T([1, 2])([3.7, 3.675])(TEXTURE("cupola.png")(HALFSPHERE(1.6)([32, 32])))
@@ -412,8 +416,8 @@ def roof():
     det3 = MKPOL([[[0.15, 0.062, 0], [0.15, -0.062, 0], [0, 0, 0.08]], [[3, 2, 1]], [[1]]])
     detDome2 = STRUCT([det3, R([1, 2])(PI / 4)(det3), R([1, 2])(PI / 2)(det3), R([1, 2])(PI / 4 * 3)(det3), R([1, 2])(PI)(det3),
                         R([1, 2])(-PI / 4)(det3), R([1, 2])(-PI / 2)(det3), R([1, 2])(-PI / 4 * 3)(det3)])
-    onDome = COLOR([1, 0.808, 0.6])(STRUCT([T(3)(1.099)(MY_CYLINDER([0.35, 0.03])(32)), T(3)(1.129)(MY_CYLINDER([0.37, 0.02])(32)), T(3)(1.149)(detDome1),
-                     T(3)(1.309)(MY_CYLINDER([0.1, 0.01])(16)), T(3)(1.319)(detDome2)]))
+    onDome = COLOR([1, 0.855, 0.702])(STRUCT([T(3)(1.099)(MY_CYLINDER([0.35, 0.03])(64)), T(3)(1.129)(MY_CYLINDER([0.37, 0.02])(64)), T(3)(1.149)(detDome1),
+                     T(3)(1.309)(MY_CYLINDER([0.1, 0.01])(64)), T(3)(1.319)(detDome2)]))
 
     finalDome = STRUCT([frag1,T(3)(0.15)(frag2), T(3)(0.3)(frag3), T(3)(0.41)(frag4), T(3)(0.56)(frag5), T(3)(0.67)(frag6),
                         T(3)(0.805)(frag7), T(3)(0.909)(frag8), T(3)(1)(frag9), onDome])
@@ -422,7 +426,7 @@ def roof():
                    R([1, 2])(PI / 20)(detailDome([1.63, 1.46, 1.56, 0.13, 0.07])([1.46, 1.42, 0.03]))])
 
     det5 = R([1,2])(PI/15)(detailDome([1.52,1.37, 1.47,0.13,0.07])([1.37,1.33, 0.03]))
-    finalDet =  STRUCT([det4, T(3)(0.25)(det5)])
+    finalDet = STRUCT([det4, T(3)(0.25)(det5)])
 
     return STRUCT([finalRoof, T([1,2,3])([3.7,3.675,1.2])(finalDome), dome, T([1, 2])([3.7,3.675])(finalDet)])
 
@@ -430,7 +434,7 @@ def roof():
 def fragDome(parameters):
     re,ri,h,t = parameters
 
-    base = COLOR([1, 0.855, 0.702])(DIFFERENCE([MY_CYLINDER([re,h])(32),MY_CYLINDER([ri,h])(16)]))
+    base = COLOR([1, 0.855, 0.702])(DIFFERENCE([MY_CYLINDER([re,h])(100),MY_CYLINDER([ri,h])(32)]))
     angle = (3.14*(re+0.02))/20
     if(t==1):
         c = R([1, 2])(PI / 40)(TEXTURE("tegole1.png")(T(1)(re + 0.02)(R([1, 3])(PI / 12 * 4)(T([1, 2])([-0.005, -(angle / 2)])(CUBOID([0.005, angle, 0.25]))))))
@@ -778,11 +782,28 @@ def puerta(type):
         return movingStructureBuilderDoor(wx, wy, wz, wb)
 
 
+
+#VIEW(STRUCT([puerta(2), T(1)(2)(window(2)),T(4)(puerta(3))]))
 #VIEW(groundFloor())
+
+#VIEW(STRUCT([detailsWindow(1),detailsDoor(1)]))
+#VIEW(STRUCT([detailsWindow(2),detailsDoor(2)]))
+#VIEW(STRUCT([puerta(1), T(1)(2)(window(1)),T(4)(puerta(3))]))
+#VIEW(detailDome([1.35, 1.22, 1.3, 0.13, 0.07])([1.22, 1.18, 0.03]))
 #VIEW(firstFloor())
+
+
+#VIEW(STRUCT([T(1)(3)(window(2)), T(1)(5)(puerta(4))]))
 #VIEW(secondFloor())
+
+
+VIEW(roof())
+
+
+
+
 #VIEW(balcony())
-#VIEW(roof())
+
 #VIEW(lateralStructure())
 
 #VIEW(villa())
@@ -792,8 +813,8 @@ def puerta(type):
 
 
 #VIEW(fragDome([1.77,1.61,0.15, 2]))
-
-
+#VIEW(T(1)(3)(window(3)))
+#VIEW(T(1)(3)(puerta(3)))
 
 
 
