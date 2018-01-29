@@ -5,6 +5,10 @@ import csv
 
 
 def fileReader(filename,h):
+    """this function reads a file and draws lines lo on the x and y plane and then expands them on the z coordinate of the quantity h.
+            :param filename: name of the file that contains lines
+            :param h: height of the wall
+            :return: an HPC object"""
     with open(filename, "rb") as file:
         reader = csv.reader(file, delimiter=",")
         externalWalls = []
@@ -15,9 +19,9 @@ def fileReader(filename,h):
             y1 = float(row[2])
             y2 = float(row[3])
             externalWalls.append(OFFSET([0.15, 0.15])(POLYLINE([[x1, y1], [x2, y2]])))
-        doors = PROD([STRUCT(externalWalls), Q(h)])
+        walls = PROD([STRUCT(externalWalls), Q(h)])
 
-    return doors
+    return walls
 
 
 def groundFloor():
@@ -452,21 +456,11 @@ def fragDome(parameters):
     return STRUCT([base, T(3)(h)(finalCop)])
 
 
-def villa():
-    ground = groundFloor()
-    first = firstFloor()
-    second = secondFloor()
-    r = roof()
-    centralStruct = T([1,2])([3.65,3.65])(STRUCT([ground, T(3)(1.1)(first), T(3)(3.3)(second), T([1, 2, 3])([3.7,3.675,3.3])(balcony()),
-                                                  T(3)(4.4)(r)]))
-    lateral = lateralStructure()
-
-    latStruct = STRUCT([T([1,2])([11,5.38])(lateral), T([1,2])([9.28,11])(R([1,2])(PI/2)(lateral)),
-                        T([1,2])([3.65,9.28])(R([1,2])(PI)(lateral)), T([1,2])([5.38,3.65])(R([1,2])(-PI/2)(lateral))])
-    return STRUCT([centralStruct, latStruct])
-
 
 def detailWindow(type):
+    """the function returns a detail of window of the desired type
+                    :param type: type of the detail of window
+                    :return: an HPC object"""
     if type == 1:
         det1 = T(3)(0.25)(CUBOID([0.58,0.05,0.05]))
         det2 = T([1,2,3])([0.03,0.01,0.2])(CUBOID([0.52,0.04,0.05]))
@@ -510,6 +504,9 @@ def detailWindow(type):
 
 
 def detailDoor(type):
+    """the function returns a detail of door of the desired type
+                :param type: type of the detail of door
+                :return: an HPC object"""
     if type == 1:
 
         det1 = STRUCT([T([1,2])([0.195,0.075])(CUBOID([0.72,0.08,1.52])), T([1,2])([0.135,0.115])(CUBOID([0.84,0.04,1.64]))])
@@ -567,12 +564,13 @@ def detailDoor(type):
         return COLOR([1,0.808,0.6])(STRUCT([finalDet1, T(1)(-0.09)(finalDet2), T(1)(0.34)(finalDet2), finalDet3]))
 
 
-def movingStructureBuilderWindow(X, Y, Z, B):
+def movingStructureBuilder(X, Y, Z, B, type):
         """
         :param X: a list of distances on the X axis
         :param Y: a list of distances on the Y axis
         :param Z: a list of distances on the Z axis
         :param B: a three-dimensional matrix of occupancy
+        :param type: window or door
         :return: a 2nd order function
         """
         struct = []
@@ -584,7 +582,10 @@ def movingStructureBuilderWindow(X, Y, Z, B):
                 for h in range(0, len(B[l][w])):  # for each z
                     if (w > 0) and (w < len(B[l]) - 1):
                         if ((B[l][w][h] is True) and (B[l][w - 1][h] is False) and (B[l][w + 1][h] is False)):
-                            struct.append(TEXTURE("grass3.png")(T([1, 2, 3])([x, y, z])(CUBOID([X[l], Y[w], Z[h]]))))
+                            if(type =="window"):
+                                struct.append(TEXTURE("grass3.png")(T([1, 2, 3])([x, y, z])(CUBOID([X[l], Y[w], Z[h]]))))
+                            elif type == "door":
+                                struct.append(TEXTURE("wood2.png")(T([1, 2, 3])([x, y, z])(CUBOID([X[l], Y[w], Z[h]]))))
                         elif (B[l][w][h]):
                             struct.append(TEXTURE("wood2.png")(T([1, 2, 3])([x, y, z])(CUBOID([X[l], Y[w], Z[h]]))))
                     elif (B[l][w][h]):
@@ -598,37 +599,12 @@ def movingStructureBuilderWindow(X, Y, Z, B):
         return pol
 
 
-def movingStructureBuilderDoor(X, Y, Z, B):
-    """
-    :param X: a list of distances on the X axis
-    :param Y: a list of distances on the Y axis
-    :param Z: a list of distances on the Z axis
-    :param B: a three-dimensional matrix of occupancy
-    :return: a 2nd order function
-    """
-    struct = []
-    x = 0
-    for l in range(0, len(B)):  # for each x
-        y = 0
-        for w in range(0, len(B[l])):  # for each y
-            z = 0
-            for h in range(0, len(B[l][w])):  # for each z
-                if (w > 0) and (w < len(B[l]) - 1):
-                    if ((B[l][w][h] is True) and (B[l][w - 1][h] is False) and (B[l][w + 1][h] is False)):
-                        struct.append(TEXTURE("wood2.png")(T([1, 2, 3])([x, y, z])(CUBOID([X[l], Y[w], Z[h]]))))
-                    elif (B[l][w][h]):
-                        struct.append(TEXTURE("wood2.png")(T([1, 2, 3])([x, y, z])(CUBOID([X[l], Y[w], Z[h]]))))
-                elif (B[l][w][h]):
-                    struct.append(TEXTURE("wood2.png")(T([1, 2, 3])([x, y, z])(CUBOID([X[l], Y[w], Z[h]]))))
 
-                z += Z[h]
-            y += Y[w]
-        x += X[l]
-    pol = STRUCT(struct)
-
-    return pol
 
 def window(type):
+    """the function returns a window of the desired type
+            :param type: type of the window
+            :return: an HPC object"""
 
     if type ==1:
         wx = [0.04,0.14,0.04,0.14,0.04]
@@ -642,7 +618,7 @@ def window(type):
              ]
         glass = TEXTURE("grass3.png")(OFFSET([0,0.024,0])(MKPOL([[[0.04,0.038,0.68],[0.04,0.038,0.86],[0.36,0.038,0.86],
                                                                   [0.36,0.038,0.68]],[[1,2,3,4]],[[1]]])))
-        return STRUCT([movingStructureBuilderWindow(wx, wy, wz, wb),glass])
+        return STRUCT([movingStructureBuilder(wx, wy, wz, wb,"window"),glass])
     elif type == 2:
         wx = [0.04,0.145,0.03,0.145,0.04]
         wy = [0.04,0.02,0.04]
@@ -653,7 +629,7 @@ def window(type):
               [[True, False, True], [True, True, True], [True, False, True]],
               [[True, True, True], [True, True, True], [True, True, True]]
               ]
-        return movingStructureBuilderWindow(wx, wy, wz, wb)
+        return movingStructureBuilder(wx, wy, wz, wb,"window")
     elif type ==3:
         wx = [0.03,0.052,0.02,0.052,0.02,0.052,0.02,0.052,0.02,0.052,0.03]
         wy = [0.02,0.01,0.02]
@@ -692,7 +668,7 @@ def window(type):
                [True, True, True, True, True, True, True, True, True, True, True],
                [True, True, True, True, True, True, True, True, True, True, True]]
               ]
-        return movingStructureBuilderWindow(wx, wy, wz, wb)
+        return movingStructureBuilder(wx, wy, wz, wb,"window")
     elif type ==4:
         wx = [0.02,0.12,0.02,0.12,0.02]
         wy = [0.03,0.015,0.03]
@@ -705,10 +681,14 @@ def window(type):
              ]
         glass = TEXTURE("grass3.png")(OFFSET([0,0.019,0])(MKPOL([[[0.02,0.028,0.675],[0.02,0.028,0.865],[0.28,0.028,0.865],
                                                                   [0.28,0.028,0.675]],[[1,2,3,4]],[[1]]])))
-        return STRUCT([movingStructureBuilderWindow(wx, wy, wz, wb),glass])
+        return STRUCT([movingStructureBuilder(wx, wy, wz, wb,"window"),glass])
 
 
 def puerta(type):
+    """the function returns a door of the desired type
+                :param type: type of the door
+                :return: an HPC object"""
+
     if type == 1:
         wx = [0.04, 0.24, 0.04, 0.24, 0.04]
         wy = [0.02, 0.06, 0.02]
@@ -735,7 +715,7 @@ def puerta(type):
                ]
               ]
 
-        return movingStructureBuilderDoor(wx, wy, wz, wb)
+        return movingStructureBuilder(wx, wy, wz, wb,"door")
 
     elif type == 2:
         wx = [0.05, 0.225, 0.05, 0.225, 0.05]
@@ -748,7 +728,7 @@ def puerta(type):
               [[True, True, True, True, True],[True, True, True, True, True],[True, True, True, True, True]]
              ]
 
-        return movingStructureBuilderDoor(wx, wy, wz, wb)
+        return movingStructureBuilder(wx, wy, wz, wb,"door")
 
     elif type ==3:
 
@@ -759,7 +739,7 @@ def puerta(type):
               [[False,True],[True,True],[False,True]],
               [[True,True],[True,True],[True,True]]
               ]
-        return movingStructureBuilderDoor(wx, wy, wz, wb)
+        return movingStructureBuilder(wx, wy, wz, wb,"door")
 
     elif type == 4:
         wx = [0.03, 0.24, 0.03]
@@ -769,7 +749,7 @@ def puerta(type):
               [[False, True], [True, True], [False, True]],
               [[True, True], [True, True], [True, True]]
               ]
-        return movingStructureBuilderDoor(wx, wy, wz, wb)
+        return movingStructureBuilder(wx, wy, wz, wb,"door")
 
     else:
         wx = [0.05, 0.35, 0.05]
@@ -779,42 +759,33 @@ def puerta(type):
               [[False, True], [True, True], [False, True]],
               [[True, True], [True, True], [True, True]]
               ]
-        return movingStructureBuilderDoor(wx, wy, wz, wb)
+        return movingStructureBuilder(wx, wy, wz, wb,"door")
+
+def ggpl_villaLaRotonda(params):
+    """ This function returns  Villa La Rotonda
+                        :param dx: distance along the x axis
+                        :param dy: distance along the y axis
+                        :param dz: distance along the z axis
+                        :return: an object HPC"""
+    dx,dy,dz = params
+    ground = groundFloor()
+    first = firstFloor()
+    second = secondFloor()
+    r = roof()
+    centralStruct = T([1,2])([3.65,3.65])(STRUCT([ground, T(3)(1.1)(first), T(3)(3.3)(second), T([1, 2, 3])([3.7,3.675,3.3])(balcony()),
+                                                  T(3)(4.4)(r)]))
+    lateral = lateralStructure()
+
+    latStruct = STRUCT([T([1,2])([11,5.38])(lateral), T([1,2])([9.28,11])(R([1,2])(PI/2)(lateral)),
+                        T([1,2])([3.65,9.28])(R([1,2])(PI)(lateral)), T([1,2])([5.38,3.65])(R([1,2])(-PI/2)(lateral))])
+    finalVilla = STRUCT([centralStruct, latStruct])
+    return S([1, 2, 3])([double(dx/14.65), double(dy/14.65), double(dz/5.799)])(finalVilla)
 
 
 
-#VIEW(STRUCT([puerta(2), T(1)(2)(window(2)),T(4)(puerta(3))]))
-#VIEW(groundFloor())
-
-#VIEW(STRUCT([detailsWindow(1),detailsDoor(1)]))
-#VIEW(STRUCT([detailsWindow(2),detailsDoor(2)]))
-#VIEW(STRUCT([puerta(1), T(1)(2)(window(1)),T(4)(puerta(3))]))
-#VIEW(detailDome([1.35, 1.22, 1.3, 0.13, 0.07])([1.22, 1.18, 0.03]))
-#VIEW(firstFloor())
+VIEW(ggpl_villaLaRotonda([14.65,14.65,5.799]))
 
 
-#VIEW(STRUCT([T(1)(3)(window(2)), T(1)(5)(puerta(4))]))
-#VIEW(secondFloor())
-
-
-VIEW(roof())
-
-
-
-
-#VIEW(balcony())
-
-#VIEW(lateralStructure())
-
-#VIEW(villa())
-
-
-
-
-
-#VIEW(fragDome([1.77,1.61,0.15, 2]))
-#VIEW(T(1)(3)(window(3)))
-#VIEW(T(1)(3)(puerta(3)))
 
 
 
